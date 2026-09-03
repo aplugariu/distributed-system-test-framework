@@ -14,14 +14,14 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: pytest tests/api tests/integration tests/resilience --cov=app --cov-report=term-missing
+      - run: pytest tests/api tests/integration tests/resilience/test_contracts.py --cov=app --cov-report=term-missing
 
   docker-integration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: docker compose up -d --build postgres redis api worker
-      - run: docker compose --profile test run --rm integration-tests
+      - run: pytest tests/resilience/test_worker_recovery.py tests/resilience/test_redis_recovery.py -v
       - if: always()
         run: docker compose logs
       - if: always()
