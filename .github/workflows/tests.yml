@@ -10,32 +10,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - run: pip install -r requirements.txt
+
       - run: pytest tests/api tests/integration tests/resilience/test_contracts.py --cov=app --cov-report=term-missing
 
-docker-integration:
-  runs-on: ubuntu-latest
+  docker-integration:
+    runs-on: ubuntu-latest
 
-  steps:
-    - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-    - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
-    - run: docker compose up -d --build postgres redis api worker
+      - run: docker compose up -d --build postgres redis api worker
 
-    - run: docker compose --profile test run --rm integration-tests
+      - run: docker compose --profile test run --rm integration-tests
 
-    - run: pytest tests/resilience/test_worker_recovery.py tests/resilience/test_redis_recovery.py -v
+      - run: pytest tests/resilience/test_worker_recovery.py tests/resilience/test_redis_recovery.py -v
 
-    - if: always()
-      run: docker compose logs
+      - if: always()
+        run: docker compose logs
 
-    - if: always()
-      run: docker compose down -v
+      - if: always()
+        run: docker compose down -v
