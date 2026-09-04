@@ -1,5 +1,6 @@
 import os
 import time
+import json
 
 from redis import Redis
 from sqlalchemy import create_engine
@@ -25,7 +26,19 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 redis_client = Redis.from_url(REDIS_URL, decode_responses=True)
 
 
-def process_device(device_id: str) -> None:
+def process_device(
+    device_id: str,
+    correlation_id: str | None = None,
+) -> None:
+    print(
+    f"service=worker "
+    f"event=processing_started "
+    f"correlation_id={correlation_id} "
+    f"device_id={device_id} "
+    f"status=PROCESSING",
+    flush=True,
+    )
+
     with SessionLocal() as db:
         device = db.get(Device, device_id)
 
@@ -47,6 +60,15 @@ def process_device(device_id: str) -> None:
             else DeviceStatus.READY
         )
         db.commit()
+        print(
+    f"service=worker "
+    f"event=processing_completed "
+    f"correlation_id={correlation_id} "
+    f"device_id={device_id} "
+    f"status={device.status.value}",
+    flush=True,
+)
+        
 
 
 def recover_pending_items() -> None:
@@ -67,21 +89,29 @@ def run() -> None:
 
     while True:
         try:
-            device_id = redis_client.brpoplpush(
+            message = redis_client.brpoplpush(
                 QUEUE_NAME,
                 PROCESSING_QUEUE_NAME,
                 timeout=5,
             )
 
-            if device_id is None:
+            if message is None:
                 continue
 
-            process_device(device_id)
+            try:
+                payload = json.loads(message)
+                device_id = payload["device_id"]
+                correlation_id = payload.get("correlation_id")
+            except json.JSONDecodeError:
+                device_id = message
+                correlation_id = None
+
+            process_device(device_id, correlation_id)
 
             redis_client.lrem(
                 PROCESSING_QUEUE_NAME,
                 1,
-                device_id,
+                message,
             )
 
         except RedisError as exc:
