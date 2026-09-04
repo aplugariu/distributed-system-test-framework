@@ -32,11 +32,10 @@ def process_device(device_id: str) -> None:
         if not device:
             return
 
-        # Idempotency protection:
-        # already completed devices do not need to be processed again
         if device.status in {DeviceStatus.READY, DeviceStatus.FAILED}:
             return
 
+        device.processing_count += 1
         device.status = DeviceStatus.PROCESSING
         db.commit()
 

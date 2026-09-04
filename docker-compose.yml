@@ -10,6 +10,8 @@ services:
       interval: 2s
       timeout: 2s
       retries: 20
+    ports:
+    - "5432:5432"
 
   redis:
     image: redis:7-alpine
@@ -18,6 +20,9 @@ services:
       interval: 2s
       timeout: 2s
       retries: 20
+    ports:
+    - "6379:6379"
+      
 
   api:
     build: .
