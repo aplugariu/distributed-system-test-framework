@@ -16,3 +16,4 @@ class DeviceRead(BaseModel):
     name: str
     status: DeviceStatus
     created_at: datetime
+    processing_count: int

@@ -7,14 +7,14 @@ def wait_for_status(
     device_id: str,
     expected_status: str,
     timeout: float = 15.0,
-) -> None:
+) -> dict:
     deadline = time.time() + timeout
 
     while time.time() < deadline:
         device = get_device(device_id)
 
         if device["status"] == expected_status:
-            return
+            return device
 
         time.sleep(0.25)
 
