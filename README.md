@@ -210,7 +210,7 @@ My background is in embedded-system and HIL validation, where testing commonly i
 
 This project applies the same validation mindset to distributed software systems.
 
-Instead of CAN/XCP/ECU state, the observables are APIs, database state, queues, worker behavior and message acknowledgement.
+The project applies the same system-validation mindset to APIs, databases, queues and asynchronous workers.
 
 Instead of power-cycle or communication fault injection, the tests stop workers, Redis or PostgreSQL and validate deterministic recovery behavior.
 
