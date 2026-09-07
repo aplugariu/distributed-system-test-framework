@@ -172,5 +172,16 @@ def run() -> None:
             time.sleep(1)
 
 
+def mark_processing(device_id: str) -> None:
+    with SessionLocal() as db:
+        device = db.get(Device, device_id)
+
+        if not device:
+            return
+
+        device.processing_count += 1
+        device.status = DeviceStatus.PROCESSING
+        db.commit()
+
 if __name__ == "__main__":
     run()
