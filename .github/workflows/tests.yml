@@ -17,7 +17,7 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: pytest tests/api tests/integration tests/resilience/test_contracts.py --cov=app --cov-report=term-missing
+      - run: pytest tests/api tests/integration/test_state_machine.py tests/resilience/test_contracts.py --cov=app --cov-report=term-missing
 
   docker-integration:
     runs-on: ubuntu-latest
@@ -35,8 +35,8 @@ jobs:
 
       - run: docker compose --profile test run --rm integration-tests
 
-      - run: pytest tests/resilience/test_worker_recovery.py tests/resilience/test_redis_recovery.py -v
-
+      - run: pytest tests/integration/test_db_consistency.py tests/resilience/test_worker_recovery.py tests/resilience/test_redis_recovery.py -v
+      
       - if: always()
         run: docker compose logs
 
